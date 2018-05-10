@@ -4,8 +4,8 @@
 // rationale.
 //
 // Debug logging is controlled via environment variables. Set
-// DEPLOY_ENV to "dev" or set LOG_DEBUG to a non empty value to enable
-// the debug log.
+// DEPLOY_ENV to "dev" or "development", or set LOG_DEBUG to a non
+// empty value to enable the debug log.
 package log // import "github.com/dangersalad/go-log"
 
 import (
@@ -19,13 +19,8 @@ import (
 var (
 	debugPrefix   = "DBG"
 	infoPrefix    = "NFO"
-	debugEnabled  = false
-	defaultLogger = NewLogger("main")
+	defaultLogger = NewLogger("main", true)
 )
-
-func init() {
-	debugEnabled = checkDebugEnabled()
-}
 
 // Debug logs a debug message
 func Debug(a ...interface{}) {
@@ -59,34 +54,43 @@ func Printf(f string, a ...interface{}) {
 
 // Logger is a logger with a prefix
 type Logger struct {
-	prefix string
+	prefix       string
+	debugEnabled bool
 }
 
-// NewLogger returns a logger with the specified prefix
-func NewLogger(p string) *Logger {
+// NewLogger returns a logger with the specified prefix and debugging
+// possibly enabled. If debugEnabled is `false`, debug logging is
+// always disabled. If `true`, it will follow the environment
+// variables.
+func NewLogger(prefix string, debugEnabled bool) *Logger {
+	d := false
+	if debugEnabled {
+		d = checkDebugEnabled()
+	}
 	return &Logger{
-		prefix: p,
+		prefix:       prefix,
+		debugEnabled: d,
 	}
 }
 
 // Debug logs a debug message with the logger's prefix
 func (l *Logger) Debug(a ...interface{}) {
-	debug(l.prefix, a...)
+	l.debug(l.prefix, a...)
 }
 
 // Debugf logs a formatted debug message with the logger's prefix
 func (l *Logger) Debugf(f string, a ...interface{}) {
-	debugf(l.prefix, f, a...)
+	l.debugf(l.prefix, f, a...)
 }
 
 // Info logs a message with the logger's prefix
 func (l *Logger) Info(a ...interface{}) {
-	info(l.prefix, a...)
+	l.info(l.prefix, a...)
 }
 
 // Infof logs a formatted info message with the logger's prefix
 func (l *Logger) Infof(f string, a ...interface{}) {
-	infof(l.prefix, f, a...)
+	l.infof(l.prefix, f, a...)
 }
 
 // Print is an alias for Info
@@ -99,34 +103,34 @@ func (l *Logger) Printf(f string, a ...interface{}) {
 	l.Infof(f, a...)
 }
 
-func debug(prefix string, a ...interface{}) {
-	if !debugEnabled {
+func (l *Logger) debug(prefix string, a ...interface{}) {
+	if !l.debugEnabled {
 		return
 	}
-	output(debugPrefix, prefix, a...)
+	l.output(debugPrefix, prefix, a...)
 }
 
-func debugf(prefix, f string, a ...interface{}) {
-	if !debugEnabled {
+func (l *Logger) debugf(prefix, f string, a ...interface{}) {
+	if !l.debugEnabled {
 		return
 	}
-	outputf(debugPrefix, prefix, f, a...)
+	l.outputf(debugPrefix, prefix, f, a...)
 }
 
-func info(prefix string, a ...interface{}) {
-	output(infoPrefix, prefix, a...)
+func (l *Logger) info(prefix string, a ...interface{}) {
+	l.output(infoPrefix, prefix, a...)
 }
 
-func infof(prefix, f string, a ...interface{}) {
-	outputf(infoPrefix, prefix, f, a...)
+func (l *Logger) infof(prefix, f string, a ...interface{}) {
+	l.outputf(infoPrefix, prefix, f, a...)
 }
 
-func output(levelPrefix, loggerPrefix string, a ...interface{}) {
-	if debugEnabled {
+func (l *Logger) output(levelPrefix, loggerPrefix string, a ...interface{}) {
+	if l.debugEnabled {
 		a = append([]interface{}{fmt.Sprintf("%s  | ", getCaller())}, a...)
 	}
 	a = append([]interface{}{fmt.Sprintf("%s  | ", loggerPrefix)}, a...)
-	if debugEnabled {
+	if l.debugEnabled {
 		a = append([]interface{}{fmt.Sprintf("%s  | ", levelPrefix)}, a...)
 	}
 	a = append([]interface{}{fmt.Sprintf("%s  | ", getTimestamp())}, a...)
@@ -134,8 +138,8 @@ func output(levelPrefix, loggerPrefix string, a ...interface{}) {
 	fmt.Println(a...)
 }
 
-func outputf(levelPrefix, loggerPrefix, f string, a ...interface{}) {
-	if debugEnabled {
+func (l *Logger) outputf(levelPrefix, loggerPrefix, f string, a ...interface{}) {
+	if l.debugEnabled {
 		f = fmt.Sprintf("%s  |  %s  |  %s  |  %s  |  %s", getTimestamp(), levelPrefix, loggerPrefix, getCaller(), f)
 	} else {
 		f = fmt.Sprintf("%s  |  %s  |  %s", getTimestamp(), loggerPrefix, f)
@@ -172,5 +176,8 @@ func getCaller(s ...int) string {
 }
 
 func checkDebugEnabled() bool {
-	return os.Getenv("DEPLOY_ENV") == "dev" || os.Getenv("LOG_DEBUG") != ""
+	deployEnv := os.Getenv("DEPLOY_ENV")
+	return deployEnv == "dev" ||
+		deployEnv == "development" ||
+		os.Getenv("LOG_DEBUG") != ""
 }
