@@ -27,6 +27,11 @@ func Debug(a ...interface{}) {
 	defaultLogger.Debug(a...)
 }
 
+// Debugln logs a debug message
+func Debugln(a ...interface{}) {
+	defaultLogger.Debug(a...)
+}
+
 // Debugf logs a formatted debug message
 func Debugf(f string, a ...interface{}) {
 	defaultLogger.Debugf(f, a...)
@@ -37,6 +42,11 @@ func Info(a ...interface{}) {
 	defaultLogger.Info(a...)
 }
 
+// Infoln logs a message
+func Infoln(a ...interface{}) {
+	defaultLogger.Info(a...)
+}
+
 // Infof logs a formatted message
 func Infof(f string, a ...interface{}) {
 	defaultLogger.Infof(f, a...)
@@ -44,6 +54,11 @@ func Infof(f string, a ...interface{}) {
 
 // Print is an alias for Info
 func Print(a ...interface{}) {
+	Info(a...)
+}
+
+// Println is an alias for Info
+func Println(a ...interface{}) {
 	Info(a...)
 }
 
@@ -78,6 +93,11 @@ func (l *Logger) Debug(a ...interface{}) {
 	l.debug(l.prefix, a...)
 }
 
+// Debugln logs a debug message with the logger's prefix
+func (l *Logger) Debugln(a ...interface{}) {
+	l.debug(l.prefix, a...)
+}
+
 // Debugf logs a formatted debug message with the logger's prefix
 func (l *Logger) Debugf(f string, a ...interface{}) {
 	l.debugf(l.prefix, f, a...)
@@ -88,6 +108,11 @@ func (l *Logger) Info(a ...interface{}) {
 	l.info(l.prefix, a...)
 }
 
+// Infoln logs a message with the logger's prefix
+func (l *Logger) Infoln(a ...interface{}) {
+	l.info(l.prefix, a...)
+}
+
 // Infof logs a formatted info message with the logger's prefix
 func (l *Logger) Infof(f string, a ...interface{}) {
 	l.infof(l.prefix, f, a...)
@@ -95,6 +120,11 @@ func (l *Logger) Infof(f string, a ...interface{}) {
 
 // Print is an alias for Info
 func (l *Logger) Print(a ...interface{}) {
+	l.Info(a...)
+}
+
+// Println is an alias for Info
+func (l *Logger) Println(a ...interface{}) {
 	l.Info(a...)
 }
 
