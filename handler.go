@@ -37,17 +37,14 @@ func (w *statusWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 
 // HTTPHandler returns a handler that will log out request data.
 //
-// blacklist can be nil, in which case all calls are logged
-//
-// If the logger name is an empty string, the default "main" logger is
+// If the logger is nil, the default "main" logger is
 // used.
-func HTTPHandler(h http.Handler, name string, blacklist *regexp.Regexp) http.Handler {
+//
+// blacklist can be nil, in which case all calls are logged
+func HTTPHandler(h http.Handler, logger *Logger, blacklist *regexp.Regexp) http.Handler {
 
-	var logger *Logger
-	if name == "" {
+	if logger == nil {
 		logger = defaultLogger
-	} else {
-		logger = NewLogger(name)
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
