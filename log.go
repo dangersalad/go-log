@@ -100,32 +100,32 @@ func NewLogger(prefix string, debugEnabled bool) *Logger {
 
 // Debug logs a debug message with the logger's prefix
 func (l *Logger) Debug(a ...interface{}) {
-	l.debug(l.prefix, a...)
+	l.debug(a...)
 }
 
 // Debugln logs a debug message with the logger's prefix
 func (l *Logger) Debugln(a ...interface{}) {
-	l.debug(l.prefix, a...)
+	l.debug(a...)
 }
 
 // Debugf logs a formatted debug message with the logger's prefix
 func (l *Logger) Debugf(f string, a ...interface{}) {
-	l.debugf(l.prefix, f, a...)
+	l.debugf(f, a...)
 }
 
 // Info logs a message with the logger's prefix
 func (l *Logger) Info(a ...interface{}) {
-	l.info(l.prefix, a...)
+	l.info(a...)
 }
 
 // Infoln logs a message with the logger's prefix
 func (l *Logger) Infoln(a ...interface{}) {
-	l.info(l.prefix, a...)
+	l.info(a...)
 }
 
 // Infof logs a formatted info message with the logger's prefix
 func (l *Logger) Infof(f string, a ...interface{}) {
-	l.infof(l.prefix, f, a...)
+	l.infof(f, a...)
 }
 
 // Print is an alias for Info
@@ -143,33 +143,33 @@ func (l *Logger) Printf(f string, a ...interface{}) {
 	l.Infof(f, a...)
 }
 
-func (l *Logger) debug(prefix string, a ...interface{}) {
+func (l *Logger) debug(a ...interface{}) {
 	if !l.debugEnabled {
 		return
 	}
-	l.output(debugPrefix, prefix, a...)
+	l.output(debugPrefix, a...)
 }
 
-func (l *Logger) debugf(prefix, f string, a ...interface{}) {
+func (l *Logger) debugf(f string, a ...interface{}) {
 	if !l.debugEnabled {
 		return
 	}
-	l.outputf(debugPrefix, prefix, f, a...)
+	l.outputf(debugPrefix, f, a...)
 }
 
-func (l *Logger) info(prefix string, a ...interface{}) {
-	l.output(infoPrefix, prefix, a...)
+func (l *Logger) info(a ...interface{}) {
+	l.output(infoPrefix, a...)
 }
 
-func (l *Logger) infof(prefix, f string, a ...interface{}) {
-	l.outputf(infoPrefix, prefix, f, a...)
+func (l *Logger) infof(f string, a ...interface{}) {
+	l.outputf(infoPrefix, f, a...)
 }
 
-func (l *Logger) output(levelPrefix, loggerPrefix string, a ...interface{}) {
+func (l *Logger) output(levelPrefix string, a ...interface{}) {
 	if l.debugEnabled {
 		a = append([]interface{}{fmt.Sprintf("%s  | ", getCaller())}, a...)
 	}
-	a = append([]interface{}{fmt.Sprintf("%s  | ", loggerPrefix)}, a...)
+	a = append([]interface{}{fmt.Sprintf("%s  | ", l.prefix)}, a...)
 	if l.debugEnabled {
 		a = append([]interface{}{fmt.Sprintf("%s  | ", levelPrefix)}, a...)
 	}
@@ -178,11 +178,11 @@ func (l *Logger) output(levelPrefix, loggerPrefix string, a ...interface{}) {
 	fmt.Println(a...)
 }
 
-func (l *Logger) outputf(levelPrefix, loggerPrefix, f string, a ...interface{}) {
+func (l *Logger) outputf(levelPrefix, f string, a ...interface{}) {
 	if l.debugEnabled {
-		f = fmt.Sprintf("%s  |  %s  |  %s  |  %s  |  %s", getTimestamp(), levelPrefix, loggerPrefix, getCaller(), f)
+		f = fmt.Sprintf("%s  |  %s  |  %s  |  %s  |  %s", getTimestamp(), levelPrefix, l.prefix, getCaller(), f)
 	} else {
-		f = fmt.Sprintf("%s  |  %s  |  %s", getTimestamp(), loggerPrefix, f)
+		f = fmt.Sprintf("%s  |  %s  |  %s", getTimestamp(), l.prefix, f)
 	}
 
 	if f[len(f)-1] != '\n' {
