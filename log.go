@@ -67,6 +67,16 @@ func Printf(f string, a ...interface{}) {
 	Infof(f, a...)
 }
 
+// Die will log out an error with "%+v" and exit the process with an
+// optional code.
+//
+// Only available at the package level. This is meant to be used with
+// github.com/pkg/errors and only at the top level of a process to
+// handle errors that bubble up.
+func Die(err error, code ...int) {
+	defaultLogger.die(err, code...)
+}
+
 // Logger is a logger with a prefix
 type Logger struct {
 	prefix       string
@@ -179,6 +189,15 @@ func (l *Logger) outputf(levelPrefix, loggerPrefix, f string, a ...interface{}) 
 		f += "\n"
 	}
 	fmt.Printf(f, a...)
+}
+
+func (l *Logger) die(err error, code ...int) {
+	fmt.Fprintf(os.Stderr, "DIE %s\n%+v\n", getTimestamp(), err)
+	c := 1
+	if len(code) > 0 {
+		c = code[0]
+	}
+	os.Exit(c)
 }
 
 func getTimestamp() string {
