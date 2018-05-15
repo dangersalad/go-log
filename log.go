@@ -22,6 +22,11 @@ var (
 	defaultLogger = NewLogger("main", true)
 )
 
+// SetDefaultName changes the name of the package level logger.
+func SetDefaultName(n string) {
+	defaultLogger.prefix = n
+}
+
 // Debug logs a debug message
 func Debug(a ...interface{}) {
 	defaultLogger.Debug(a...)
