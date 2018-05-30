@@ -233,5 +233,7 @@ func checkDebugEnabled() bool {
 	deployEnv := os.Getenv("DEPLOY_ENV")
 	return deployEnv == "dev" ||
 		deployEnv == "development" ||
+		deployEnv == "test" ||
+		deployEnv == "testing" ||
 		os.Getenv("LOG_DEBUG") != ""
 }
