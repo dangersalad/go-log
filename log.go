@@ -88,6 +88,8 @@ type Logger struct {
 	debugEnabled bool
 }
 
+const prefixLimit = 6
+
 // NewLogger returns a logger with the specified prefix and debugging
 // possibly enabled. If debugEnabled is `false`, debug logging is
 // always disabled. If `true`, it will follow the environment
@@ -96,6 +98,10 @@ func NewLogger(prefix string, debugEnabled bool) *Logger {
 	d := false
 	if debugEnabled {
 		d = checkDebugEnabled()
+	}
+	// limit prefix
+	if len(prefix) > prefixLimit {
+		prefix = prefix[0:prefixLimit]
 	}
 	return &Logger{
 		prefix:       prefix,
@@ -174,7 +180,7 @@ func (l *Logger) output(levelPrefix string, a ...interface{}) {
 	if l.debugEnabled {
 		a = append([]interface{}{fmt.Sprintf("%s  | ", getCaller())}, a...)
 	}
-	a = append([]interface{}{fmt.Sprintf("%s  | ", l.prefix)}, a...)
+	a = append([]interface{}{fmt.Sprintf("%-6s  | ", l.prefix)}, a...)
 	if l.debugEnabled {
 		a = append([]interface{}{fmt.Sprintf("%s  | ", levelPrefix)}, a...)
 	}
@@ -185,9 +191,9 @@ func (l *Logger) output(levelPrefix string, a ...interface{}) {
 
 func (l *Logger) outputf(levelPrefix, f string, a ...interface{}) {
 	if l.debugEnabled {
-		f = fmt.Sprintf("%s  |  %s  |  %s  |  %s  |  %s", getTimestamp(), levelPrefix, l.prefix, getCaller(), f)
+		f = fmt.Sprintf("%s  |  %s  |  %-6s  |  %s  |  %s", getTimestamp(), levelPrefix, l.prefix, getCaller(), f)
 	} else {
-		f = fmt.Sprintf("%s  |  %s  |  %s", getTimestamp(), l.prefix, f)
+		f = fmt.Sprintf("%s  |  %-6s  |  %s", getTimestamp(), l.prefix, f)
 	}
 
 	if f[len(f)-1] != '\n' {
