@@ -24,7 +24,11 @@ var (
 
 // SetDefaultName changes the name of the package level logger.
 func SetDefaultName(n string) {
-	defaultLogger.prefix = n
+	if len(n) > prefixLimit {
+		defaultLogger.prefix = n[0:prefixLimit]
+	} else {
+		defaultLogger.prefix = n
+	}
 }
 
 // Debug logs a debug message
@@ -89,6 +93,7 @@ type Logger struct {
 }
 
 const prefixLimit = 6
+const callerLimit = 22
 
 // NewLogger returns a logger with the specified prefix and debugging
 // possibly enabled. If debugEnabled is `false`, debug logging is
@@ -178,7 +183,7 @@ func (l *Logger) infof(f string, a ...interface{}) {
 
 func (l *Logger) output(levelPrefix string, a ...interface{}) {
 	if l.debugEnabled {
-		a = append([]interface{}{fmt.Sprintf("%s  | ", getCaller())}, a...)
+		a = append([]interface{}{fmt.Sprintf("%-22s  | ", getCaller())}, a...)
 	}
 	a = append([]interface{}{fmt.Sprintf("%-6s  | ", l.prefix)}, a...)
 	if l.debugEnabled {
@@ -191,7 +196,7 @@ func (l *Logger) output(levelPrefix string, a ...interface{}) {
 
 func (l *Logger) outputf(levelPrefix, f string, a ...interface{}) {
 	if l.debugEnabled {
-		f = fmt.Sprintf("%s  |  %s  |  %-6s  |  %s  |  %s", getTimestamp(), levelPrefix, l.prefix, getCaller(), f)
+		f = fmt.Sprintf("%s  |  %s  |  %-6s  |  %-22s  |  %s", getTimestamp(), levelPrefix, l.prefix, getCaller(), f)
 	} else {
 		f = fmt.Sprintf("%s  |  %-6s  |  %s", getTimestamp(), l.prefix, f)
 	}
@@ -229,10 +234,27 @@ func getCaller(s ...int) string {
 		return getCaller(skip + 2)
 	}
 
-	parts := strings.Split(fullfile, "/")
-	file := strings.Join(parts[len(parts)-2:], "/")
+	return normalizeCaller(line, fullfile)
 
-	return fmt.Sprintf("%s:%d", file, line)
+}
+
+func normalizeCaller(line int, fullfile string, counts ...int) string {
+	count := 4
+	if len(counts) > 0 {
+		count = counts[0]
+	}
+	parts := strings.Split(fullfile, "/")
+	file := strings.Join(parts[len(parts)-count:], "/")
+
+	caller := fmt.Sprintf("%s:%d", file, line)
+	if len(caller) > callerLimit {
+		if count == 1 {
+			return caller[len(caller)-callerLimit:]
+		}
+		return normalizeCaller(line, fullfile, count-1)
+	}
+
+	return caller
 }
 
 func checkDebugEnabled() bool {
