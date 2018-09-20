@@ -68,9 +68,9 @@ func HTTPHandler(h http.Handler, logger *Logger, blacklist *regexp.Regexp) http.
 		}
 		switch c := sw.status; true {
 		case c >= 500:
-			logger.Infof("%s %s (%s)", r.Method, r.URL, diffStr)
+			logger.Infof("%s %s [%d] (%s)", r.Method, r.URL, c, diffStr)
 		default:
-			logger.Debugf("%s %s (%s)", r.Method, r.URL, diffStr)
+			logger.Debugf("%s %s [%d] (%s)", r.Method, r.URL, c, diffStr)
 		}
 	})
 }
