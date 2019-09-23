@@ -13,7 +13,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"time"
 )
 
 var (
@@ -189,16 +188,15 @@ func (l *Logger) output(levelPrefix string, a ...interface{}) {
 	if l.debugEnabled {
 		a = append([]interface{}{fmt.Sprintf("%s  | ", levelPrefix)}, a...)
 	}
-	a = append([]interface{}{fmt.Sprintf("%s  | ", getTimestamp())}, a...)
 
 	fmt.Println(a...)
 }
 
 func (l *Logger) outputf(levelPrefix, f string, a ...interface{}) {
 	if l.debugEnabled {
-		f = fmt.Sprintf("%s  |  %s  |  %-6s  |  %-22s  |  %s", getTimestamp(), levelPrefix, l.prefix, getCaller(), f)
+		f = fmt.Sprintf("%s  |  %-6s  |  %-22s  |  %s", levelPrefix, l.prefix, getCaller(), f)
 	} else {
-		f = fmt.Sprintf("%s  |  %-6s  |  %s", getTimestamp(), l.prefix, f)
+		f = fmt.Sprintf("%-6s  |  %s", l.prefix, f)
 	}
 
 	if f[len(f)-1] != '\n' {
@@ -208,16 +206,12 @@ func (l *Logger) outputf(levelPrefix, f string, a ...interface{}) {
 }
 
 func (l *Logger) die(err error, code ...int) {
-	fmt.Fprintf(os.Stderr, "DIE %s\n%+v\n", getTimestamp(), err)
+	fmt.Fprintf(os.Stderr, "DIE\n%+v\n", err)
 	c := 1
 	if len(code) > 0 {
 		c = code[0]
 	}
 	os.Exit(c)
-}
-
-func getTimestamp() string {
-	return fmt.Sprintf("%-30s", time.Now().UTC().Format(time.RFC3339Nano))
 }
 
 func getCaller(s ...int) string {
